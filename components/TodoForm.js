@@ -4,6 +4,11 @@ import { useState } from 'react'
 
 export default function TodoForm({ onAdd }) {
   const [text, setText] = useState('')
+  function clearAll() {
+    if (!window.confirm('すべての TODO を削除しますか？')) return
+    setTodos([])
+  }
+
   function handleSubmit(e) {
     e.preventDefault()
     const trimmed = text.trim()
@@ -11,6 +16,7 @@ export default function TodoForm({ onAdd }) {
     onAdd(trimmed)
     setText('')
   }
+  
   return (
     <form onSubmit={handleSubmit}>
       <input
