@@ -16,11 +16,11 @@ test('TODO を追加・完了・削除できる', async () => {
   await user.type(input, '牛乳を買う{Enter}')
   await user.type(input, 'レポート提出{Enter}')
   expect(screen.getAllByRole('listitem')).toHaveLength(2)
-  expect(screen.getByText(/残り \s* 2  \s*件/)).toBeInTheDocument()
+  expect(screen.getByText(/残り\s*2\s*件/)).toBeInTheDocument()
 
   // 完了
   await user.click(screen.getByRole('checkbox', { name: '牛乳を買う' }))
-  expect(screen.getByText(/残り\s* 1  \s* 件/)).toBeInTheDocument()
+  expect(screen.getByText(/残り\s*1\s*件/)).toBeInTheDocument()
   // 削除
   await user.click(screen.getByRole('button', { name: 'レポート提出を削除' }))
   expect(screen.queryByText('レポート提出')).not.toBeInTheDocument()
@@ -32,4 +32,27 @@ test('localStorage に保存された TODO が最初から表示される', () =
   render(<TodoApp />)
   expect(screen.getByRole('checkbox', { name: '保存済みの TODO' })).toBeChecked()
   expect(screen.getByText(/残り\s* 0 \s*件/)).toBeInTheDocument()
+})
+
+test('空白だけでは TODO は増えない', async () => {
+
+  const user = userEvent.setup()
+  render(<TodoApp />)
+  await user.type(screen.getByRole('textbox', { name: 'やること' }), '   {Enter}')
+  expect(screen.getByText('やることはありません')).toBeInTheDocument()
+  expect(screen.queryByRole('listitem')).not.toBeInTheDocument()
+})
+
+afterEach(() => {
+  jest.restoreAllMocks()
+})
+
+test('すべて削除：キャンセルしたら何も消えない', async () => {
+  const user = userEvent.setup()
+  localStorage.setItem('todos', JSON.stringify([{ id: '1', text: '牛乳を買う', done: false }]))
+  jest.spyOn(window, 'confirm').mockReturnValue(false)
+  render(<TodoApp />)
+  await user.click(screen.getByRole('button', { name: 'すべて削除' }))
+  expect(window.confirm).toHaveBeenCalledWith('すべての TODO を削除しますか？')
+  expect(screen.getByText('牛乳を買う')).toBeInTheDocument()
 })

@@ -11,6 +11,7 @@ export default function TodoForm({ onAdd }) {
     onAdd(trimmed)
     setText('')
   }
+  
   return (
     <form onSubmit={handleSubmit}>
       <input
